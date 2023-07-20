@@ -30,6 +30,17 @@ def format_hours_to_string(hours:float)->str:
         return f"-{format_hours_to_string(-hours)}"
     return '{0:02.0f}:{1:02.0f} h'.format(*divmod(hours * 60, 60))
 
+def print_stats_aligned(stats:list[tuple[str,str]])->None:
+    max_key_length=max(len(k) for k,v in stats)
+    max_value_length=max(len(v) for k,v in stats)
+    
+    for key, value in stats:
+        if key=='-':
+            print(value*(2+max_key_length+max_value_length))
+            continue
+        spaces=1+max_key_length-len(key)+max_value_length-len(value)
+        print(f"{key}:{' '*(spaces)}{value}")
+
 ###############################################
 # MAIN
 ###############################################
@@ -78,23 +89,34 @@ def main()->None:
 
     if(config.V):print('########################')
 
+    stats:list[tuple[str,str]]=[]
+
     tracked_hours_this_week=(seconds_tracked_this_week / 60.0) / 60.0
     tracked_hours_this_week+=current_duration
-    print(f"Tracked this week: {format_hours_to_string(tracked_hours_this_week)}")
+    #print(f"Tracked this week: {format_hours_to_string(tracked_hours_this_week)}")
+    stats.append(('Tracked this week',format_hours_to_string(tracked_hours_this_week)))
 
 
     still_to_do=target_hours-tracked_hours
     done_hours_this_week=config.HOURS_PER_WEEK-still_to_do
     overtime=done_hours_this_week-tracked_hours_this_week
-    print(f"Previous overtime: {format_hours_to_string(overtime)}")
-    print(f"Done this week:    {format_hours_to_string(done_hours_this_week)}")
-    print(f"Target hours:      {format_hours_to_string(config.HOURS_PER_WEEK)}")
-    print('                   -------')
-    print(f"Still to do:       {format_hours_to_string(still_to_do)}")
+    #print(f"Previous overtime: {format_hours_to_string(overtime)}")
+    stats.append(('Previous overtime',format_hours_to_string(overtime)))
+    #print(f"Done this week:    {format_hours_to_string(done_hours_this_week)}")
+    stats.append(('Done this week',format_hours_to_string(done_hours_this_week)))
+    #print(f"Target hours:      {format_hours_to_string(config.HOURS_PER_WEEK)}")
+    stats.append(('Target hours',format_hours_to_string(config.HOURS_PER_WEEK)))
+    #print('                   -------')
+    stats.append(('-','-'))
+    #print(f"Still to do:       {format_hours_to_string(still_to_do)}")
+    stats.append(('Still to do',format_hours_to_string(still_to_do)))
 
 
     percentage=1.-(still_to_do/config.HOURS_PER_WEEK)
-    print(f"Done of this week: {percentage*100:.2f} %")
+    #print(f"Done of this week: {percentage*100:.2f} %")
+    stats.append(('Done of this week',f"{percentage*100:.2f} %"))
+
+    print_stats_aligned(stats)
 
 if __name__ == '__main__':
     main()
