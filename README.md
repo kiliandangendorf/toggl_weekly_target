@@ -20,6 +20,11 @@ Rename `config.tpl.py` to `config.py`:
 mv config.tpl.py config.py
 ```
 
+Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
 And run `main.py`:
 ```bash
 python main.py
@@ -34,11 +39,4 @@ Target hours:      30:00 h
                    -------
 Still to do:       02:26 h
 Done of this week: 91.88 %
-```
-
-## Troubleshooting
-
-Maybe you need to install `python-dateutil`:
-```bash
-pip install python-dateutil
 ```
