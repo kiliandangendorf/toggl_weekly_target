@@ -14,6 +14,10 @@ HOURS_PER_WEEK=30
 # Decimal of hours to carry over from before the start date (negative: overtime, positive: undertime)
 CARRY_OVER=0.0
 
+# Fetch time entries until the end of the week (True) or only until today now (False)
+# Useful if you have entries in future as vacation or something
+FETCH_UNTIL_END_OF_WEEK=True
+
 # Toggl data comes in UTC (GMT) and needs to be converted to local time
 TIMEZONE='Europe/Berlin'
 
