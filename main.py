@@ -28,7 +28,7 @@ def get_start_of_week_from_string(date:str)->dt.datetime:
 def format_hours_to_string(hours:float)->str:
     if hours<0:
         return f"-{format_hours_to_string(-hours)}"
-    return '{0:02.0f}:{1:02.0f} h'.format(*divmod(hours * 60, 60))
+    return '{0:02.0f}:{1:02.0f} h'.format(*divmod(round(hours,2) * 60, 60))
 
 def print_stats_aligned(stats:list[tuple[str,str]])->None:
     max_key_length=max(len(k) for k,v in stats)
