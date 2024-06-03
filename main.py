@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import datetime as dt
 from dateutil import tz
 
@@ -60,6 +62,10 @@ def main()->None:
     toggl_api=api.TogglAPI(config.API_TOKEN, '+00:00')
     if(config.V):print(f"Fetching time entries from {start_date} to {end_date}")
     time_entries=toggl_api.get_time_entries(start_date=start_date.isoformat(), end_date=end_date.isoformat())
+
+    if type(time_entries) is str:
+        print(f"Error fetching time entries: {time_entries}")
+        raise Exception(f"Received no JSON from Toggl, got string instead: '{time_entries}'")
 
     week_between_start_and_now=(next_monday-start_monday)/7
     if(config.V):print(f"Weeks between start monday ({start_monday}) and next monday ({next_monday}): {week_between_start_and_now.days} weeks")
