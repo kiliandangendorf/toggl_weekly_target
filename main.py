@@ -43,13 +43,14 @@ def print_stats_aligned(stats:list[tuple[str,str]])->None:
         spaces=1+max_key_length-len(key)+max_value_length-len(value)
         print(f"{key}:{' '*(spaces)}{value}")
 
-def read_cache_or_get_default()->tuple[dt.date,int]:
+def read_cache_or_get_default()->tuple[dt.datetime,int]:
     # Note this date will be a monday (beginning of week)
     try:
         with open(config.CACHE_FILE, 'r') as cache_file:
             cache_content=cache_file.readlines()
             cache_date=dt.datetime.strptime(cache_content[0].strip(), '%Y-%m-%d')
             cache_seconds=float(cache_content[1].strip())
+            print(f"Found cache file, using start date: {cache_date.date()} and seconds tracked before: {cache_seconds}")
             return cache_date, cache_seconds
     except FileNotFoundError:
         print(f"No cache file found, using default start date: {config.START_DATE_STRING}")
@@ -58,10 +59,10 @@ def read_cache_or_get_default()->tuple[dt.date,int]:
         print(f"Error reading cache file: {e}")
         return dt.datetime.strptime(config.START_DATE_STRING, '%Y-%m-%d'), .0
 
-def write_cache(date:dt.date, seconds_tracked_before:int)->None:
+def write_cache(date:dt.date, seconds_tracked_before:float)->None:
     # Note to give a monday and seconds according to this date
     with open(config.CACHE_FILE, 'w') as cache_file:
-        cache_file.write(f"{date.date()}\n{seconds_tracked_before}")
+        cache_file.write(f"{date}\n{seconds_tracked_before}")
 
 ###############################################
 # MAIN
@@ -80,7 +81,7 @@ def main()->None:
 
     # fetch data from toggl (giving time in UTC)
     toggl_api=api.TogglAPI(config.API_TOKEN, '+00:00')
-    if(config.V):print(f"Fetching time entries from {start_date} to {end_date}")
+    if(config.V):print(f"Fetching time entries from {start_date.date()} to {end_date.date()}")
     time_entries=toggl_api.get_time_entries(start_date=start_date.isoformat(), end_date=end_date.isoformat())
 
     if type(time_entries) is str:
@@ -106,7 +107,7 @@ def main()->None:
     seconds_tracked_before_this_week*=config.CRIME_FACTOR
     total_seconds_tracked=seconds_tracked_before_this_week+seconds_tracked_this_week
 
-    write_cache(start_monday, seconds_tracked_before_this_week)
+    write_cache(last_monday, seconds_tracked_before_this_week)
 
 
     tracked_hours=(total_seconds_tracked / 60.0) / 60.0
