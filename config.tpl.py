@@ -29,3 +29,6 @@ TIME_FORMAT='%Y-%m-%dT%H:%M:%S%z'
 
 # The secret ingredient is crime ;) (multiply tracked hours before start date with this factor)
 CRIME_FACTOR=1.
+
+# Cache file
+CACHE_FILE='cache.twt'

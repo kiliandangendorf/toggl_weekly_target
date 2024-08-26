@@ -43,11 +43,31 @@ def print_stats_aligned(stats:list[tuple[str,str]])->None:
         spaces=1+max_key_length-len(key)+max_value_length-len(value)
         print(f"{key}:{' '*(spaces)}{value}")
 
+def read_cache_or_get_default()->tuple[dt.date,int]:
+    # Note this date will be a monday (beginning of week)
+    try:
+        with open(config.CACHE_FILE, 'r') as cache_file:
+            cache_content=cache_file.readlines()
+            cache_date=dt.datetime.strptime(cache_content[0].strip(), '%Y-%m-%d')
+            cache_seconds=float(cache_content[1].strip())
+            return cache_date, cache_seconds
+    except FileNotFoundError:
+        print(f"No cache file found, using default start date: {config.START_DATE_STRING}")
+        return dt.datetime.strptime(config.START_DATE_STRING, '%Y-%m-%d'), .0
+    except Exception as e:
+        print(f"Error reading cache file: {e}")
+        return dt.datetime.strptime(config.START_DATE_STRING, '%Y-%m-%d'), .0
+
+def write_cache(date:dt.date, seconds_tracked_before:int)->None:
+    # Note to give a monday and seconds according to this date
+    with open(config.CACHE_FILE, 'w') as cache_file:
+        cache_file.write(f"{date.date()}\n{seconds_tracked_before}")
+
 ###############################################
 # MAIN
 ###############################################
-def main()->None:
-    start_date=dt.datetime.strptime(config.START_DATE_STRING, '%Y-%m-%d')
+def main()->None:    
+    start_date, seconds_tracked_before_cache=read_cache_or_get_default()
     utc_now=dt.datetime.utcnow()
     end_date=utc_now
 
@@ -78,11 +98,15 @@ def main()->None:
     # TODO: Optimize this when there are many entries
     seconds_tracked_this_week=sum(max(entry['duration'], 0) for entry in time_entries if get_start_of_week_from_string(entry['start'])>=last_monday)
     seconds_tracked_before_this_week=sum(max(entry['duration'], 0) for entry in time_entries)-seconds_tracked_this_week
+    # add optional cache
+    seconds_tracked_before_this_week+=seconds_tracked_before_cache
 
 
     # THE SECRET INGREDIENT IS CRIME
     seconds_tracked_before_this_week*=config.CRIME_FACTOR
     total_seconds_tracked=seconds_tracked_before_this_week+seconds_tracked_this_week
+
+    write_cache(start_monday, seconds_tracked_before_this_week)
 
 
     tracked_hours=(total_seconds_tracked / 60.0) / 60.0
