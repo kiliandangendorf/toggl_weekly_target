@@ -50,10 +50,10 @@ def read_cache_or_get_default()->tuple[dt.datetime,int]:
             cache_content=cache_file.readlines()
             cache_date=dt.datetime.strptime(cache_content[0].strip(), '%Y-%m-%d')
             cache_seconds=float(cache_content[1].strip())
-            print(f"Found cache file, using start date: {cache_date.date()} and seconds tracked before: {cache_seconds}")
+            if(config.V):print(f"Found cache file, using start date: {cache_date.date()} and seconds tracked before: {cache_seconds}")
             return cache_date, cache_seconds
     except FileNotFoundError:
-        print(f"No cache file found, using default start date: {config.START_DATE_STRING}")
+        if(config.V):print(f"No cache file found, using default start date: {config.START_DATE_STRING}")
         return dt.datetime.strptime(config.START_DATE_STRING, '%Y-%m-%d'), .0
     except Exception as e:
         print(f"Error reading cache file: {e}")
