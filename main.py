@@ -69,7 +69,7 @@ def write_cache(date:dt.date, seconds_tracked_before:float)->None:
 ###############################################
 def main()->None:    
     start_date, seconds_tracked_before_cache=read_cache_or_get_default()
-    utc_now=dt.datetime.utcnow()
+    utc_now=dt.datetime.now(dt.UTC)
     end_date=utc_now
 
     start_monday=get_start_of_week_from_datetime(start_date)
@@ -89,6 +89,8 @@ def main()->None:
         raise Exception(f"Received no JSON from Toggl, got string instead: '{time_entries}'")
 
     week_between_start_and_now=(next_monday-start_monday)/7
+    if seconds_tracked_before_cache>0:
+        week_between_start_and_now=(next_monday-get_start_of_week_from_datetime(dt.datetime.strptime(config.START_DATE_STRING, '%Y-%m-%d')))/7
     if(config.V):print(f"Weeks between start monday ({start_monday}) and next monday ({next_monday}): {week_between_start_and_now.days} weeks")
 
     target_hours=week_between_start_and_now.days*config.HOURS_PER_WEEK
@@ -101,13 +103,13 @@ def main()->None:
     seconds_tracked_before_this_week=sum(max(entry['duration'], 0) for entry in time_entries)-seconds_tracked_this_week
     # add optional cache
     seconds_tracked_before_this_week+=seconds_tracked_before_cache
+    write_cache(last_monday, seconds_tracked_before_this_week)
 
 
     # THE SECRET INGREDIENT IS CRIME
     seconds_tracked_before_this_week*=config.CRIME_FACTOR
     total_seconds_tracked=seconds_tracked_before_this_week+seconds_tracked_this_week
 
-    write_cache(last_monday, seconds_tracked_before_this_week)
 
 
     tracked_hours=(total_seconds_tracked / 60.0) / 60.0
