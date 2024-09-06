@@ -69,7 +69,7 @@ def write_cache(date:dt.date, seconds_tracked_before:float)->None:
 ###############################################
 def main()->None:    
     start_date, seconds_tracked_before_cache=read_cache_or_get_default()
-    utc_now=dt.datetime.now(dt.UTC)
+    utc_now=dt.datetime.now(dt.timezone.utc)
     end_date=utc_now
 
     start_monday=get_start_of_week_from_datetime(start_date)
